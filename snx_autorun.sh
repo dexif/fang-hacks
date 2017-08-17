@@ -1,6 +1,11 @@
 #!/bin/sh
 
+sleep 30
+
 [ -z "$MDEV" ] && return
+
+# WlanSetup via SD-Card
+/media/$MDEV/wlansetup.sh
 
 echo "$(date) - $0: Running (device: $MDEV)" >> /tmp/hacks.log 2>&1
 
@@ -15,6 +20,7 @@ if [ ! -d "/tmp/www/cgi-bin" ]; then
 	mkdir -p "/tmp/www/cgi-bin";
 	echo "$(date) - $0: Created /tmp/www/cgi-bin" >> /tmp/hacks.log 2>&1
 fi
+
 for i in /media/$MDEV/bootstrap/www/*; do
   echo "$i -> /tmp/www/cgi-bin/$(basename $i)"
   ln -sf "$i" "/tmp/www/cgi-bin/$(basename $i)" >> /tmp/hacks.log 2>&1
