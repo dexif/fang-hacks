@@ -1,0 +1,43 @@
+#!/bin/sh
+
+led_on()
+{
+    gpio_led -n 3 -m 1 -v 1 > /dev/null 2>&1
+}
+
+led_off()
+{
+    gpio_led -n 3 -m 1 -v 0 > /dev/null 2>&1
+}
+
+start()
+{
+  echo "Controlling status LED"
+
+  # Blink
+  led_off
+  led_on
+  led_off
+  led_on
+  led_off
+  led_on
+
+  # Off when done
+  led_off
+}
+
+stop()
+{
+  echo "Restoring original status LED state"
+  led_on
+  rm -f "$STATUSFILE"
+}
+
+if [ $# -eq 0 ]; then
+  start
+else
+  case $1 in start|stop)
+    $1
+    ;;
+  esac
+fi
