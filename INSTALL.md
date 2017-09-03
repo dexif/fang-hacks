@@ -82,21 +82,13 @@ From http://hints.macworld.com/article.php?story=2009041216314856:
 
 ## Speaker
 
-I downloaded the SDK zip file, however I wasn't able to find a player binary.
-Samtap posted a binary of it (not sure if he find it in the sdk or he cross
-compiled it from source using the SDK).  You just only need to copy it to
-the camera (you can copy it to the SD) and execute it. To do it, once you
-copy the file, you need to make it executeble via command 'chmod +x
-filename'. Then you can play a sound file via ' ./pcm_play soundfile.wav'
-
-I noticed that in order to be played properly the wav file should be 16 bit
-mono 8000Hz
-
-pcm_play
-
 Enable the speaker:
 
     gpio_ms1 -n 7 -m 1 -v 1
+
+Disable the speaker:
+
+    gpio_ms1 -n 7 -m 1 -v 0
 
 
 ## SDK
