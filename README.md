@@ -17,8 +17,8 @@ The bootstrap folder contains CGI scripts for the embedded Boa webserver. The ``
 
 Both must be copied to the vfat partition.
 
-### 3. Copy data folder
-The data folder must be copied to the ext2 partition.
+### 3. Copy data and sounds folders
+The `data` and `sounds` folders must be copied to the ext2 partition.
 
 ### 4. Place sd-card in device
 Boot the device without sd-card, wait until the blue led stops flashing. The device will automatically run ```snx_autorun.sh``` when the sd-card is inserted. Do not boot the device with the card inserted and then re-insert it, to prevent it from being mounted incorrectly (mmcblk1 instead of mmcblk0).
@@ -55,7 +55,17 @@ By default the following services are enabled:
 - Dropbear SSH/SCP/SFTP 
 - A script controls the IR filter and LEDs
 - Manage the device via the status page ```http://device-ip/cgi-bin/status```
+- Trigger a security-alarm style alarm via
+  `http://device-ip/cgi-bin/alarm?cmd=start`.  Stop by changing `?cmd=stop` in
+  the URL.
+- `pcm_play [filename.wav]`: playback 8kHz, mono 16-bit PCM files
+- `pcm_play-48k [filename.wav]`: playback 48kHz, mono 16-bit PCM files
 
 ## Support
 For questions, suggestions or just general discussion, please join #fanghacks on irc.freenode.net
 There's also a discord channel: https://discord.gg/xhRzpPn
+
+## Other resources
+
+* http://bobbyromeo.com/technology/xiaomi-smart-1080p-wifi-ip-camera-rtsp-streaming-hack/
+* Teardown and console access: https://github.com/fritz-smh/yi-hack/issues/118#issuecomment-271574536

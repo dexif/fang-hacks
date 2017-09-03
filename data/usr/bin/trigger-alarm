@@ -1,0 +1,32 @@
+#!/bin/sh
+
+disable_alarm() {
+  # Disable speaker
+  gpio_ms1 -n 7 -m 1 -v 0
+
+  echo "System deactived"
+  exit
+}
+
+trap disable_alarm SIGINT SIGTERM
+
+alarm=$1
+if [ -z "$alarm" ]; then
+  alarm=/media/mmcblk0p2/sounds/alarm.wav
+fi
+
+if ! [ -f "$alarm" ]; then
+  echo "Alarm sound file not found at $alarm"
+  exit 1
+fi
+
+# Enable speaker
+gpio_ms1 -n 7 -m 1 -v 1
+
+# TODO Raise volume to max
+
+# Continuously play alarm noise
+echo "Alarm triggered!"
+while true; do
+  /media/mmcblk0p2/data/usr/bin/pcm_play-48k "$alarm" > /dev/null 2>&1
+done
