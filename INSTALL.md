@@ -93,7 +93,61 @@ Disable the speaker:
 
 ## SDK
 
+Firstly, obtain the Sonix SDK and setup an Ubuntu 17.04 machine.
+I've set up a machine using Docker::
+
+    docker run -it ubuntu:17.04 bash
+    apt-get install -y sudo
+
+If you're not keen on Docker, then you can run all of the following on a
+bare metal machine or other form of VM host (like Virtualbox).
+
+Install the dependencies::
+
     sudo dpkg --add-architecture i386
-    sudo apt-get install -y gcc libencode-detect-perl lzop ncurses-dev:i386 gcc-arm-linux-gnueabi:i386 libz-dev:i386
-    tar xf SDK.tgz
+    sudo apt-get install -y \
+      bash \
+      gcc \
+      make \
+      patch \
+      libencode-detect-perl \
+      libdigest-crc-perl \
+      libncurses-dev \
+      libz-dev:i386 \
+      cpio \
+      lzma \
+      lzop
+
+Reconfigure your default `/bin/sh` if required.  The scripts have shebangs
+that actually require `bash` but declare `/bin/sh`::
+
+    rm /bin/sh && ln -s /bin/bash /bin/sh
+
+Extract and compile the SDK:
+
+    tar xf SN986_1.60_QR_Scan_019a_20160606_0951.tgz
+    cd SN986_1.60_QR_Scan_019a_20160606_0951
+    bash ./sdk.unpack
+    # Minor patch for perl error
+    sed -i 's/defined(@val)/@val/' snx_sdk/kernel/linux-2.6.35.12/src/kernel/timeconst.pl
+
+    cd snx_sdk/buildscript
+    make sn98660_402mhz_sf_defconfig
+
+    make
+    make ez-setup
+
+At this point, executable objects have been compiled and can be extracted
+to copy to your device.  For example, to play sounds you can use
+`snx_sdk/app/ez-setup/rootfs/usr/bin/pcm_play`. There are many more similar
+examples and utilities available elsewhere in the directory tree.
+
+To list all modules (eg in case you want to recompile just part of the setup):
+
+    make showmodules
+    make [module name from previous output]
+
+To optionally build the firmware and fileystem images, you can run::
+
+    make install
 
