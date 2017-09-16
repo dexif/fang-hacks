@@ -78,10 +78,12 @@ Disable the speaker:
 
 ## SDK
 
-Firstly, obtain the Sonix SDK and setup an Ubuntu 17.04 machine.
-I've set up a machine using Docker::
+Firstly, obtain the Sonix SDK and setup an Ubuntu machine.
+I've set up a machine using Docker and the SDK .tgz is located within the path
+`/path/to/host/folder` on the host::
 
-    docker run -it ubuntu:17.04 bash
+    docker run -v /path/to/host/folder:/app -it ubuntu:16.04 bash
+    dpkg --add-architecture i386 && apt-get update
     apt-get install -y sudo
 
 If you're not keen on Docker, then you can run all of the following on a
@@ -89,7 +91,6 @@ bare metal machine or other form of VM host (like Virtualbox).
 
 Install the dependencies::
 
-    sudo dpkg --add-architecture i386
     sudo apt-get install -y \
       bash \
       gcc \
@@ -106,7 +107,7 @@ Install the dependencies::
 Reconfigure your default `/bin/sh` if required.  The scripts have shebangs
 that actually require `bash` but declare `/bin/sh`::
 
-    rm /bin/sh && ln -s /bin/bash /bin/sh
+    sudo rm /bin/sh && sudo ln -s /bin/bash /bin/sh
 
 Extract and compile the SDK:
 
