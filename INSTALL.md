@@ -54,6 +54,17 @@ Use the URL:
     rtsp://device-ip/unicast
 
 
+## Enabling cron
+
+Create the crontabs directories:
+
+    mkdir -p /var/spool/cron/crontabs
+    crontab -e
+    # Now make your changes...
+
+Now on boot, start `crond` to run the daemon.
+
+
 ## Speaker
 
 Enable the speaker:
