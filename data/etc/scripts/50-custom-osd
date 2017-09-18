@@ -1,0 +1,37 @@
+#!/bin/sh
+
+start()
+{
+  echo "Setting OSD details"
+
+  snx_isp_ctl -c 0 \
+      --osdset-en 1 \
+      --osdset-ts 1 \
+      --osdset-datastr "`hostname`" \
+      --osdset-template "0123456789./-:`hostname`" \
+      --osdset-txtcolor 0xFFFFFF \
+      --osdset-position 40,20
+}
+
+stop()
+{
+  echo "Restoring default OSD settings"
+
+  snx_isp_ctl -c 0 \
+      --osdset-en 0 \
+      --osdset-ts 0 \
+      --osdset-datastr "" \
+      --osdset-template "" \
+      --osdset-position 0,0
+
+  #rm -f "$STATUSFILE"
+}
+
+if [ $# -eq 0 ]; then
+  start
+else
+  case $1 in start|stop)
+    $1
+    ;;
+  esac
+fi
