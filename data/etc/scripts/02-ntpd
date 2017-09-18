@@ -10,8 +10,10 @@ status()
   fi
 }
 
-start() 
+start()
 {
+  echo "Get time, setting kernel timezone first..."
+  ntpd -n -q $NTPD_OPTS && hwclock -t
   echo "Starting ntpd..."
   ntpd $NTPD_OPTS
 }
