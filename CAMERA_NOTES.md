@@ -2,7 +2,36 @@
 
 * Sonix SN98660(AFG)
 
+### Hacks
+
+* 360-degree rotation: remove the base of the camera (two screws at base plus
+there are 4 plastic clips) and look at how the rotation occurs.  You'll notice
+a plastic tab that prevents 360-degree rotation.  I used a pair of scissors to
+slightly trim this tab so then rotation occurs unhindered.
+* Improved base stability: the camera's base (the "leg") tended to be quite
+flimsy and not want to stay up if extended.  To fix this, there are two screws
+to tighten -- one is exposed near the rotating base, closest to the camera and
+the other is inside the grey base.  To get to this, remove the 4 rubber pads
+on the bottom, remove the screws under each, and the base will open.  Tighten
+both "leg" screws as far as possible and re-piece the camera back together.
+
+## Terminology
+
+* ISP: Image Signal Processing
+* OSD: On Screen Display
+* MD: Motion Detection
+* PM: Private Mask (ability to hide part of the image)
+* AE: Auto Exposure
+* AWB: Auto White Balance
+* IQ: ?? (Image Quality?)
+* M2M: Memory to Memory middleware pathway
+* DRC: Dynamic Range Control (?)
+
 ## Image Signal Processing (ISP) interface
+
+Most configuration can be carried out by the `snx_isp_ctl` application.
+Otherwise, it is possible to use the file descriptor interface for most
+common aspects of the configuration.
 
 ### Adjust output image
 
