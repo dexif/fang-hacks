@@ -12,8 +12,8 @@ status()
 
 start()
 {
-  echo "Get time, setting kernel timezone first..."
-  ntpd -n -q $NTPD_OPTS && hwclock -t
+  echo "Setting kernel timezone via hwclock..."
+  modprobe snx_rtc && hwclock -s && modprobe -r snx_rtc
   echo "Starting ntpd..."
   ntpd $NTPD_OPTS
 }
