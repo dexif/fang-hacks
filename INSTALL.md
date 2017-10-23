@@ -4,39 +4,37 @@
 
 1. dd the latest image onto the SD card
 
-2. Copy updated files to the bootstrap partition:
+1. Copy updated files to the bootstrap partition:
 
        cp wlansetup.sh snx_autorun.sh .wifi* /Volumes/Untitled/
        cp -R bootstrap /Volumes/Untitled
        cp wpa_supplicant.conf /Volumes/Untitled/bootstrap/
 
-3. Turn on the camera and wait a while til the light blinks blue, indicating
+1. Turn on the camera and wait a while til the light blinks blue, indicating
    the camera is on.
 
-3. Place the microSD card into the camera and wait for the 'hammer' (tink-tink
+1. Place the microSD card into the camera and wait for the 'hammer' (tink-tink
    noise from the internal speaker)
 
-4. Get access as root to the camera either via SSH or via telnet.
+1. Get access as root to the camera either via SSH or via telnet.
 
-5. Change the root password to something else via `passwd`.
+1. Change the root password to something else via `passwd`.
 
-6. Download/replace the following files in the `data` partition:
+1. Download/replace the following files in the `data` partition:
 
        wget http://0.0.0.0:8000/data/usr/bin/fang-ir-control.sh -O data/usr/bin/fang-ir-control.sh
        wget http://0.0.0.0:8000/data/etc/scripts/01-network -O data/etc/scripts/01-network
        wget http://0.0.0.0:8000/data/etc/scripts/30-status-led -O data/etc/scripts/30-status-led
        chmod 755 data/etc/scripts/30-status-led
 
-
 * Expand the SD card (requires reboot and fiddling)
 * Ensure ftpd and telnetd are both disabled entirely. All other services to be
-enabled.
+  enabled.
 * Change the network mode to Client (requires reboot and potentially lots of
-fiddling with the wpa_supplicant.conf file)
+  fiddling with the wpa_supplicant.conf file)
 * Set the TZ to `EST-10` and hostname to `XiaoFang-Cam-X`
 * Disable Cloud Applications once boot has been assured several times
-(including after hard power down)
-
+  (including after hard power down)
 
 ## Restoring a copy of an SD card on Mac
 
@@ -46,13 +44,11 @@ From http://hints.macworld.com/article.php?story=2009041216314856:
     diskutil list
     sudo dd if=/dev/disk4 of=/dev/disk2 bs=1M
 
-
 ## Accessing the RTSP stream
 
 Use the URL:
 
     rtsp://device-ip/unicast
-
 
 ## Enabling cron
 
@@ -64,7 +60,6 @@ Create the crontabs directories:
 
 Now on boot, start `crond` to run the daemon.
 
-
 ## Speaker
 
 Enable the speaker:
@@ -74,7 +69,6 @@ Enable the speaker:
 Disable the speaker:
 
     gpio_ms1 -n 7 -m 1 -v 0
-
 
 ## SDK
 
