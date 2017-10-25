@@ -1,6 +1,9 @@
-## Hardware specs
+## Hardware
 
 * Sonix SN98660(AFG)
+* USB Devices:
+  * Bus 001 Device 001: ID 1d6b:0002 (Linux Foundation USB 2.0 Root Hubjj)
+  * Bus 001 Device 002: ID 0bda:0179 (RTL8188ETV Wireless LAN 802.11n Network Adapter)
 
 ### Hacks
 
@@ -23,9 +26,11 @@ both "leg" screws as far as possible and re-piece the camera back together.
 * PM: Private Mask (ability to hide part of the image)
 * AE: Auto Exposure
 * AWB: Auto White Balance
-* IQ: ?? (Image Quality?)
 * M2M: Memory to Memory middleware pathway
 * DRC: Dynamic Range Control (?)
+* IQ: ?? (Image Quality?)
+  * NRA: ?
+  * NRN: ?
 
 ## Image Signal Processing (ISP) interface
 
