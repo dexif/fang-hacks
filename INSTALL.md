@@ -120,7 +120,7 @@ that actually require `bash` but declare `/bin/sh`::
 
     sudo rm /bin/sh && sudo ln -s /bin/bash /bin/sh
 
-Extract and compile the SDK:
+Extract and configure the SDK:
 
     tar xf SN986_1.60_QR_Scan_019a_20160606_0951.tgz
     cd SN986_1.60_QR_Scan_019a_20160606_0951
@@ -130,6 +130,10 @@ Extract and compile the SDK:
 
     cd snx_sdk/buildscript
     make sn98660_402mhz_sf_defconfig
+
+Compile various parts of the SDK, examples, and so on, and build the final
+fil estructure:
+
     make
     make ez-setup
 
@@ -147,3 +151,83 @@ To optionally build the firmware and fileystem images, you can run::
 
     make install
 
+## Updating wpa_supplicant
+
+These instructions were adapted from
+http://wiki.beyondlogic.org/index.php?title=Cross_Compiling_iw_wpa_supplicant_hostapd_rfkill_for_ARM#wpa_supplicant_2
+and updated accordingly to use newer library versions and ensure that
+`wpa_supplicant` is built from source to incorporate the KRACK patches which
+are coming in the as-yet-unreleased v2.7.
+
+Firstly, install and configure the SDK following the instructions above.  You
+can stop just before the point of running `make` to compile the entire SDK;
+you only need to have configured the SDK and have its toolchain available.
+Specifically, you need the `crosstool` compilers and the kernel headers to build the
+libraries and software.  This ensures that the same `uClibc` you have on the
+camera is the one that you're building against for the new versions of the
+libraries and `wpa-supplicant`.  Adjust your `$SDK_PATH` below to correspond
+to where you set up your SDK.
+
+    export SDK_PATH=/opt/SN986_1.60_QR_Scan_019a_20160606_0951
+
+Install depdenencies and configure environment:
+
+    apt-get install -y wget git
+    mkdir -p /opt/build/updates
+    cd /opt/build
+    export PATH=$PATH:$SDK_PATH/toolchain/crosstool-4.5.2/bin
+
+Build `libnl`, a depednency of `wpa_supplicant`:
+
+    wget https://www.infradead.org/~tgr/libnl/files/libnl-1.1.4.tar.gz
+    tar xf libnl-*.tar.gz
+    pushd libnl-*
+    ./configure --host=arm-linux --prefix=/opt/build/updates
+    make && make install
+    popd
+
+Build `openssl` to get `libssl`, a depednency of `wpa_supplicant`:
+
+    wget https://www.openssl.org/source/openssl-1.0.2m.tar.gz
+    tar xf openssl-*.tar.gz
+    pushd openssl-*
+    export ARCH=arm
+    export CROSS_COMPILE=arm-linux-
+    ./Configure linux-generic32 --prefix=/opt/build/updates
+    make && make install
+    unset ARCH
+    unset CROSS_COMPILE
+    popd
+
+Build a pre-release version of `wpa_supplicant` from Git. `wpa_supplicant`
+v2.7 hasn't been officially released yet (as of time of writing), so we use a
+specific version from Git instead.  You could alternatively get v2.6 and apply
+the various security patches instead.
+
+    git clone https://w1.fi/hostap.git
+    pushd hostap
+    git checkout b900fb1a4300c1d9031331cb977d3becd545af3e
+    pushd wpa_supplicant
+    cp defconfig .config
+    make CC=arm-linux-gcc EXTRA_CFLAGS='-I /opt/build/updates/include' LDFLAGS='-L /opt/build/updates/lib -ldl'
+    make install DESTDIR=/opt/build/updates
+    popd
+    popd
+
+Now, you have the relevant libraries in `/opt/build/updates/lib` and the
+executables in `/opt/build/updates/usr`.  Copy these to your camera:
+
+    IP_ADDRESS=192.168.1.100
+    scp -r /opt/build/updates "root@$IP_ADDRESS:/media/mmcblk0p2/updates"
+
+And now, on your camera, you will need to run `wpa_supplicant` from this
+specific path and by specifying the correct `LD_LIBRARY_PATH` so it can find
+the relevant libraries it was built with like so:
+
+    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/media/mmcblk0p2/updates/lib \
+        /media/mmcblk0p2/rootfs/usr/local/sbin/wpa_supplicant
+
+Assuming everything is good to go, you'll see the help text for
+`wpa_supplicant` and not an error about missing libraries.  Now, apply the
+adjusted `01-network` script into your `data/etc/scripts/` directory (or
+adjust your file yourself) and you're good to go.
