@@ -60,6 +60,9 @@ do
             gpio_ms1    -m $OUTPUT -n $IR_CUT_P_PIN -v $OFF
             gpio_aud write $OUTPUT    $IR_CUT_N_PIN    $OFF
 
+            # Disable NRN (?) to improve image quality in light
+            echo 0x0 > /proc/isp/iq/nrn
+
             IR_ON=0
         fi
     else
@@ -72,6 +75,9 @@ do
             usleep 120000
             gpio_ms1    -m $OUTPUT -n $IR_CUT_P_PIN -v $OFF
             gpio_aud write $OUTPUT    $IR_CUT_N_PIN    $OFF
+
+            # Enable NRN (?) to improve image quality in dark
+            echo 0x1 > /proc/isp/iq/nrn
 
             IR_ON=1
         fi
