@@ -48,13 +48,14 @@ IR_ON=0
 while :
 do
     DAY=$(gpio_aud read "$IR_CUT_DAYNIGHT_PIN")
+    IR_ON=$(gpio_aud read "$LED_PIN")
     if [ "$DAY" -eq 1 ]
     then
-        if [ $IR_ON -eq 1 ]
+        if [ "$IR_ON" -eq 1 ]
         then
             echo 0x40 > /proc/isp/filter/saturation
-            gpio_ms1    -m $OUTPUT -n $IR_CUT_P_PIN -v $OFF
-            gpio_aud write $OUTPUT    $IR_CUT_N_PIN    $ON
+            gpio_ms1    -m $OUTPUT -n $IR_CUT_P_PIN -v $ON
+            gpio_aud write $OUTPUT    $IR_CUT_N_PIN    $OFF
             gpio_aud write $OUTPUT    $LED_PIN         $OFF
             usleep 120000
             gpio_ms1    -m $OUTPUT -n $IR_CUT_P_PIN -v $OFF
@@ -62,11 +63,9 @@ do
 
             # Disable NRN (?) to improve image quality in light
             echo 0x0 > /proc/isp/iq/nrn
-
-            IR_ON=0
         fi
     else
-        if [ $IR_ON -eq 0 ]
+        if [ "$IR_ON" -eq 0 ]
         then
             echo 0x0 > /proc/isp/filter/saturation
             gpio_ms1    -m $OUTPUT -n $IR_CUT_P_PIN -v $ON
@@ -78,8 +77,6 @@ do
 
             # Enable NRN (?) to improve image quality in dark
             echo 0x1 > /proc/isp/iq/nrn
-
-            IR_ON=1
         fi
     fi
     sleep 3
