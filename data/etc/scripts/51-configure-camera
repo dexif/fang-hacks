@@ -1,0 +1,29 @@
+#!/bin/sh
+
+start()
+{
+  echo "Configuring camera image settings"
+  snx_isp_ctl \
+      --sensorset-mir 1 \
+      --sensorset-flip 1
+}
+
+stop()
+{
+  echo "Restoring default image settings"
+
+  snx_isp_ctl \
+      --sensorset-mir 0 \
+      --sensorset-flip 0
+
+  #rm -f "$STATUSFILE"
+}
+
+if [ $# -eq 0 ]; then
+  start
+else
+  case $1 in start|stop)
+    $1
+    ;;
+  esac
+fi
