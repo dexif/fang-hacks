@@ -5,6 +5,11 @@
   * Bus 001 Device 001: ID 1d6b:0002 (Linux Foundation USB 2.0 Root Hubjj)
   * Bus 001 Device 002: ID 0bda:0179 (RTL8188ETV Wireless LAN 802.11n Network Adapter)
 
+See http://www.sonix.com.tw/files/1/3EB50406410A1767E050007F0100306D for Sonix
+datasheet and
+http://infocenter.arm.com/help/topic/com.arm.doc.ddi0198e/DDI0198E_arm926ejs_r0p5_trm.pdf
+for processor docs.
+
 ### Hacks
 
 * 360-degree rotation: remove the base of the camera (two screws at base plus
