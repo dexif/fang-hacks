@@ -34,9 +34,14 @@
        scp data/etc/scripts/* "root@$IP_ADDRESS:/media/mmcblk0p2/data/etc/scripts/"
        scp data/usr/bin/{pcm_play-48k,snx_isp_ctl} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
        scp -r sounds "root@$IP_ADDRESS:/media/mmcblk0p2/"
+       scp -r updates "root@$IP_ADDRESS:/media/mmcblk0p2/"
 
   This adds the requisite binaries for controlling the ISP (Image Signal
-  Proceesor), alarm and adds/disables services according to preferences.
+  Processor), alarm and adds/disables services according to preferences.
+  This also introduces a new `wpa_supplicant` and associated libraries within
+  the `updates/` folder (and uses these as part of the `01-network` script
+  copied in these steps).
+
 
 * Expand the SD card (requires reboot and fiddling)
 * Change the network mode to Client (requires reboot and potentially lots of
