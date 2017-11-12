@@ -22,20 +22,23 @@
 1. Place the microSD card into the camera and wait for the 'hammer' (tink-tink
    noise from the internal speaker)
 
-1. Get access as root to the camera either via SSH or via telnet.
+1. Get access as root to the camera either via SSH or via telnet. The
+   username is `root` and the default password is `ismart12`.
 
 1. Change the root password to something else via `passwd`.
 
 1. Download/replace the following files in the `data` partition:
 
-       wget http://0.0.0.0:8000/data/usr/bin/fang-ir-control.sh -O data/usr/bin/fang-ir-control.sh
-       wget http://0.0.0.0:8000/data/etc/scripts/01-network -O data/etc/scripts/01-network
-       wget http://0.0.0.0:8000/data/etc/scripts/30-status-led -O data/etc/scripts/30-status-led
-       chmod 755 data/etc/scripts/30-status-led
+       IP_ADDRESS=192.168.1.100
+       scp data/usr/bin/{fang-ir-control.sh,trigger-alarm} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
+       scp data/etc/scripts/* "root@$IP_ADDRESS:/media/mmcblk0p2/data/etc/scripts/"
+       scp data/usr/bin/{pcm_play-48k,snx_isp_ctl} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
+       scp -r sounds "root@$IP_ADDRESS:/media/mmcblk0p2/"
+
+  This adds the requisite binaries for controlling the ISP (Image Signal
+  Proceesor), alarm and adds/disables services according to preferences.
 
 * Expand the SD card (requires reboot and fiddling)
-* Ensure ftpd and telnetd are both disabled entirely. All other services to be
-  enabled.
 * Change the network mode to Client (requires reboot and potentially lots of
   fiddling with the wpa_supplicant.conf file)
 * Set the TZ to `EST-10` and hostname to `XiaoFang-Cam-X`
@@ -68,13 +71,21 @@ Now on boot, start `crond` to run the daemon.
 
 ## Speaker
 
+Both methods end up writing to the same GPIO pin output for this Sonix chip.
+
 Enable the speaker:
 
+    # Old pin reference
     gpio_ms1 -n 7 -m 1 -v 1
+    # New pin reference
+    gpio_aud write 1 4 1
 
 Disable the speaker:
 
+    # Old pin reference
     gpio_ms1 -n 7 -m 1 -v 0
+    # New pin reference
+    gpio_aud write 1 4 0
 
 ## SDK
 
@@ -82,7 +93,7 @@ Firstly, obtain the Sonix SDK and setup an Ubuntu machine.
 I've set up a machine using Docker and the SDK .tgz is located within the path
 `/path/to/host/folder` on the host::
 
-    docker run -v /path/to/host/folder:/app -it ubuntu:16.04 bash
+    docker run -v $PWD:/app -it ubuntu:16.04 bash
     dpkg --add-architecture i386 && apt-get update
     apt-get install -y sudo
 
@@ -119,7 +130,6 @@ Extract and compile the SDK:
 
     cd snx_sdk/buildscript
     make sn98660_402mhz_sf_defconfig
-
     make
     make ez-setup
 
