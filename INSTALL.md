@@ -4,11 +4,17 @@
 
 1. dd the latest image onto the SD card
 
-1. Copy updated files to the bootstrap partition:
+1. Copy updated files to the bootstrap partition.  Depending on your OS and
+   name of the parition, the path `/Volumes/Untitled` may need to be changed.
+   This is the default for macOS, however.
 
-       cp wlansetup.sh snx_autorun.sh .wifi* /Volumes/Untitled/
+       cp wlansetup.sh snx_autorun.sh /Volumes/Untitled/
        cp -R bootstrap /Volumes/Untitled
-       cp wpa_supplicant.conf /Volumes/Untitled/bootstrap/
+
+1. Copy private WiFi configuration to the SD card:
+
+       cp .private/.wifi* /Volumes/Untitled/
+       cp .private/wpa_supplicant.conf /Volumes/Untitled/bootstrap/
 
 1. Turn on the camera and wait a while til the light blinks blue, indicating
    the camera is on.
