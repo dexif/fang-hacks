@@ -2,6 +2,11 @@
 PIDFILE="/var/run/ntpd.pid"
 NTPD_OPTS="-p time.google.com"
 
+has_ip()
+{
+  ifconfig wlan0 | grep -c inet
+}
+
 status()
 {
   pid="$(cat "$PIDFILE" 2>/dev/null)"
@@ -14,7 +19,12 @@ start()
 {
   echo "Setting kernel timezone via hwclock..."
   modprobe snx_rtc && hwclock -s && modprobe -r snx_rtc
+
   echo "Starting ntpd..."
+  while [ $(has_ip) -eq 0 ]; do
+    echo "No IP yet, waiting..."
+    sleep 3
+  done
   ntpd $NTPD_OPTS
 }
 
