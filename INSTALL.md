@@ -44,8 +44,6 @@
 
 
 * Expand the SD card (requires reboot and fiddling)
-* Change the network mode to Client (requires reboot and potentially lots of
-  fiddling with the wpa_supplicant.conf file)
 * Set the TZ to `EST-10` and hostname to `XiaoFang-Cam-X`
 * Disable Cloud Applications once boot has been assured several times
   (including after hard power down)
