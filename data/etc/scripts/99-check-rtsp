@@ -1,0 +1,34 @@
+#!/bin/sh
+PIDFILE="/var/run/check_rtsp.pid"
+
+status()
+{
+  pid="$(cat "$PIDFILE" 2>/dev/null)"
+  if [ "$pid" ]; then
+    kill -0 "$pid" 2>/dev/null && echo "PID: $pid" || return 1
+  fi
+}
+
+start()
+{
+  echo "Starting RTSP checker..."
+  check_rtsp >/dev/null 2>&1 &
+  echo "$!" > "$PIDFILE"
+}
+
+stop()
+{
+  pid="$(cat "$PIDFILE" 2>/dev/null)"
+  if [ "$pid" ]; then
+     kill "$pid" || rm "$PIDFILE"
+  fi
+}
+
+if [ $# -eq 0 ]; then
+  start
+else
+  case $1 in start|stop|status)
+    $1
+    ;;
+  esac
+fi

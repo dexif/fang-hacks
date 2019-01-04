@@ -51,6 +51,7 @@ When the status page shows the hacks have been applied successfully, the followi
 By default the following services are enabled:
 - FTP server
 - RTSP server (url: ```rtsp://device-ip/unicast```)
+- Watcher that restarts the RTSP server if it dies for any reason
 - Telnetd on port 2323 (user: root, password: ismart12)
 - Dropbear SSH/SCP/SFTP 
 - A script controls the IR filter and LEDs
