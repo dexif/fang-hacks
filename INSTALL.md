@@ -30,7 +30,7 @@
 1. Download/replace the following files in the `data` partition:
 
        IP_ADDRESS=192.168.1.100
-       scp data/usr/bin/{fang-ir-control.sh,trigger-alarm} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
+       scp data/usr/bin/{fang-ir-control.sh,trigger-alarm,check_rtsp} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
        scp data/etc/scripts/* "root@$IP_ADDRESS:/media/mmcblk0p2/data/etc/scripts/"
        scp data/usr/bin/{pcm_play-48k,snx_isp_ctl} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
        scp -r sounds "root@$IP_ADDRESS:/media/mmcblk0p2/"
