@@ -1,0 +1,25 @@
+#!/bin/sh
+
+start()
+{
+  echo "Stopping boa..."
+  pid="$(pidof boa)"
+  if [ $? -eq 0 ]; then
+    kill $pid
+  fi
+}
+
+stop()
+{
+  echo "Restoring original state of boa"
+  /tmp/boa >/dev/null 2>&1
+}
+
+if [ $# -eq 0 ]; then
+  start
+else
+  case $1 in start|stop)
+    $1
+    ;;
+  esac
+fi
