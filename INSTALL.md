@@ -273,3 +273,11 @@ Copy to the camera (create the remote directories if necessary):
     scp ./snx_rtsp_server root@$IP_ADDRESS:/media/mmcblk0p2/updates/rtsp_server/usr/bin
 
     popd && popd
+
+On the camera, create a file for authentication credentials on the camera:
+
+    echo 'username:password' > /etc/config/.rtsp_auth
+
+Ensure that the new `20-rtsp-server` script is installed on the SD card and
+now you can restart the service.  You should be prompted for auth!
+
