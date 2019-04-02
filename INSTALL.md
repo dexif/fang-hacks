@@ -257,14 +257,14 @@ Build the dependencies and configure build environment:
     cd "$SDK_PATH"
     pushd snx_sdk/buildscript
     make distribute-pre
-    make middleware_video middleware_rate_ctl middleware_audio middleware_gpio middleware_common middleware_zbar-0.10 middleware_sdrecord
+    make middleware_video middleware_rate_ctl middleware_audio middleware_gpio middleware_common middleware_sdrecord
     popd
 
 Build a customised version of `snx_rtsp_server`:
 
     apt install -y git
     pushd snx_sdk/app/example/src/ipc_func/
-    rm -rf rtsp_server
+    mv rtsp_server rtsp_server.old
     git clone https://github.com/davidjb/snx_rtsp_server.git rtsp_server
     pushd rtsp_server
     make && make install
