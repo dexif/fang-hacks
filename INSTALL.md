@@ -97,15 +97,15 @@ I've set up a machine using Docker and the SDK .tgz is located within the path
 `/path/to/host/folder` on the host::
 
     docker run -v $PWD:/app -it ubuntu:16.04 bash
-    dpkg --add-architecture i386 && apt-get update
-    apt-get install -y sudo
+    dpkg --add-architecture i386 && apt update
+    apt install -y sudo
 
 If you're not keen on Docker, then you can run all of the following on a
 bare metal machine or other form of VM host (like Virtualbox).
 
 Install the dependencies::
 
-    sudo apt-get install -y \
+    sudo apt install -y \
       bash \
       gcc \
       make \
@@ -168,21 +168,22 @@ you only need to have configured the SDK and have its toolchain available.
 Specifically, you need the `crosstool` compilers and the kernel headers to build the
 libraries and software.  This ensures that the same `uClibc` you have on the
 camera is the one that you're building against for the new versions of the
-libraries and `wpa-supplicant`.  Adjust your `$SDK_PATH` below to correspond
+libraries and `wpa-supplicant`.  Adjust your `SDK_PATH` below to correspond
 to where you set up your SDK.
 
     export SDK_PATH=/opt/SN986_1.60_QR_Scan_019a_20160606_0951
 
 Install depdenencies and configure environment:
 
-    apt-get install -y wget git
+    apt install -y wget
     mkdir -p /opt/build/updates
     cd /opt/build
-    export PATH=$PATH:$SDK_PATH/toolchain/crosstool-4.5.2/bin
+    export PATH=$PATH:$SDK_PATH/snx_sdk/toolchain/crosstool-4.5.2/bin
 
 Build `libnl`, a depednency of `wpa_supplicant`:
 
-    wget https://www.infradead.org/~tgr/libnl/files/libnl-1.1.4.tar.gz
+    apt install -y libbison-dev flex
+    wget https://www.infradead.org/~tgr/libnl/files/libnl-3.2.25.tar.gz
     tar xf libnl-*.tar.gz
     pushd libnl-*
     ./configure --host=arm-linux --prefix=/opt/build/updates
@@ -191,7 +192,7 @@ Build `libnl`, a depednency of `wpa_supplicant`:
 
 Build `openssl` to get `libssl`, a depednency of `wpa_supplicant`:
 
-    wget https://www.openssl.org/source/openssl-1.0.2m.tar.gz
+    wget https://www.openssl.org/source/openssl-1.0.2r.tar.gz
     tar xf openssl-*.tar.gz
     pushd openssl-*
     export ARCH=arm
@@ -202,16 +203,14 @@ Build `openssl` to get `libssl`, a depednency of `wpa_supplicant`:
     unset CROSS_COMPILE
     popd
 
-Build a pre-release version of `wpa_supplicant` from Git. `wpa_supplicant`
-v2.7 hasn't been officially released yet (as of time of writing), so we use a
-specific version from Git instead.  You could alternatively get v2.6 and apply
-the various security patches instead.
+Build the latest `wpa_supplicant`:
 
-    git clone https://w1.fi/hostap.git
-    pushd hostap
-    git checkout b900fb1a4300c1d9031331cb977d3becd545af3e
-    pushd wpa_supplicant
+    apt install -y pkg-config
+    wget https://w1.fi/releases/wpa_supplicant-2.7.tar.gz
+    tar xf wpa_supplicant-*.tar.gz
+    pushd wpa_supplicant-*/wpa_supplicant
     cp defconfig .config
+    export PKG_CONFIG_PATH='/opt/build/updates/lib/pkgconfig'
     make CC=arm-linux-gcc EXTRA_CFLAGS='-I /opt/build/updates/include' LDFLAGS='-L /opt/build/updates/lib -ldl'
     make install DESTDIR=/opt/build/updates
     popd
@@ -221,16 +220,56 @@ Now, you have the relevant libraries in `/opt/build/updates/lib` and the
 executables in `/opt/build/updates/usr`.  Copy these to your camera:
 
     IP_ADDRESS=192.168.1.100
-    scp -r /opt/build/updates "root@$IP_ADDRESS:/media/mmcblk0p2/updates"
+    scp -r /opt/build/updates/{lib,usr} "root@$IP_ADDRESS:/media/mmcblk0p2/updates/wpa_supplicant"
 
 And now, on your camera, you will need to run `wpa_supplicant` from this
 specific path and by specifying the correct `LD_LIBRARY_PATH` so it can find
 the relevant libraries it was built with like so:
 
     LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/media/mmcblk0p2/updates/lib \
-        /media/mmcblk0p2/rootfs/usr/local/sbin/wpa_supplicant
+        /media/mmcblk0p2/updates/usr/local/sbin/wpa_supplicant
 
 Assuming everything is good to go, you'll see the help text for
 `wpa_supplicant` and not an error about missing libraries.  Now, apply the
 adjusted `01-network` script into your `data/etc/scripts/` directory (or
 adjust your file yourself) and you're good to go.
+
+## Updating rtsp servero
+
+Firstly, install and configure the SDK following the instructions above.  You
+can stop just before the point of running `make` to compile the entire SDK;
+you only need to have configured the SDK and have its toolchain available.
+Specifically, you need the `crosstool` compilers and the kernel headers to build the
+libraries and software.  This ensures that the same `uClibc` you have on the
+camera is the one that you're building against for the new versions of the
+libraries and `wpa-supplicant`.  Adjust your `SDK_PATH` below to correspond
+to where you set up your SDK.
+
+    export SDK_PATH=/opt/SN986_1.60_QR_Scan_019a_20160606_0951
+
+
+Build the dependencies and configure build environment:
+
+    cd "$SDK_PATH"
+    pushd snx_sdk/buildscript
+    make distribute-pre
+    make middleware_video middleware_rate_ctl middleware_audio middleware_gpio middleware_common middleware_zbar-0.10 middleware_sdrecord
+    popd
+
+Build a customised version of `snx_rtsp_server`:
+
+    apt install -y git
+    pushd snx_sdk/app/example/src/ipc_func/
+    rm -rf rtsp_server
+    git clone https://github.com/davidjb/snx_rtsp_server.git rtsp_server
+    pushd rtsp_server
+    make && make install
+
+Copy to the camera (create the remote directories if necessary):
+
+    IP_ADDRESS=192.168.1.100
+    ssh root@$IP_ADDRESS 'mkdir -p /media/mmcblk0p2/updates/rtsp_server/usr/bin'
+    scp -r ../../../../../middleware/_install/lib root@$IP_ADDRESS:/media/mmcblk0p2/updates/rtsp_server
+    scp ./snx_rtsp_server root@$IP_ADDRESS:/media/mmcblk0p2/updates/rtsp_server/usr/bin
+
+    popd && popd

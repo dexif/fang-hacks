@@ -13,7 +13,14 @@ start()
 {
   LOG=/dev/null
   echo "Starting RTSP server..."
-  snx_rtsp_server -W 1920 -H 1080 -b 3072 -F 25 -i 25 -a >$LOG 2>&1 &
+  auth=$(cat /etc/config/.rtsp_auth)
+  if [ "$auth" ]; then
+      LD_LIBRARY_PATH=/media/mmcblk0p2/updates/rtsp_server/lib \
+          /media/mmcblk0p2/updates/rtsp_server/usr/bin/snx_rtsp_server -A "$auth" -W 1920 -H 1080 -b 3072 -F 25 -i 25 -a >$LOG 2>&1 &
+  else
+      LD_LIBRARY_PATH=/media/mmcblk0p2/updates/rtsp_server/lib \
+          /media/mmcblk0p2/updates/rtsp_server/usr/bin/snx_rtsp_server -W 1920 -H 1080 -b 3072 -F 25 -i 25 -a >$LOG 2>&1 &
+  fi
   echo "$!" > "$PIDFILE"
 }
 
