@@ -135,7 +135,7 @@ Extract and configure the SDK:
     make sn98660_402mhz_sf_defconfig
 
 Compile various parts of the SDK, examples, and so on, and build the final
-fil estructure:
+file structure:
 
     make
     make ez-setup
