@@ -234,7 +234,11 @@ Assuming everything is good to go, you'll see the help text for
 adjusted `01-network` script into your `data/etc/scripts/` directory (or
 adjust your file yourself) and you're good to go.
 
-## Updating rtsp servero
+## Updating RTSP server
+
+A customised RTSP server is available from
+https://github.com/davidjb/snx_rtsp_server which adds some additional features
+over the built-in version - particularly authentication for RTSP.
 
 Firstly, install and configure the SDK following the instructions above.  You
 can stop just before the point of running `make` to compile the entire SDK;
