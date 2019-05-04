@@ -27,9 +27,22 @@
 
 1. Change the root password to something else via `passwd`.
 
+1. SSH into the camera and enable SSH key login (the `/root` home directory
+   isn't writable so we have to move it):
+
+   ```bash
+   cp -r /root /media/mmcblk0p2/
+   sed -i 's#/root#/media/mmcblk0p2/root#g' /etc/passwd
+   mkdir -p /media/mmcblk0p2/root/.ssh
+   chmod 700 /media/mmcblk0p2/root/.ssh
+   touch /media/mmcblk0p2/root/.ssh/authorized_keys
+   chmod 600 /media/mmcblk0p2/root/.ssh/authorized_keys
+   echo 'YOUR_KEY_HERE' >> /media/mmcblk0p2/root/.ssh/authorized_keys
+   ```
+
 1. Download/replace the following files in the `data` partition:
 
-       IP_ADDRESS=192.168.1.100
+       IP_ADDRESS=192.168.0.123
        scp data/usr/bin/{fang-ir-control.sh,trigger-alarm,check_rtsp} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
        scp data/etc/scripts/* "root@$IP_ADDRESS:/media/mmcblk0p2/data/etc/scripts/"
        scp data/usr/bin/{pcm_play-48k,snx_isp_ctl} "root@$IP_ADDRESS:/media/mmcblk0p2/data/usr/bin/"
@@ -41,7 +54,6 @@
   This also introduces a new `wpa_supplicant` and associated libraries within
   the `updates/` folder (and uses these as part of the `01-network` script
   copied in these steps).
-
 
 * Expand the SD card (requires reboot and fiddling)
 * Set the TZ to `EST-10` and hostname to `XiaoFang-Cam-X`
