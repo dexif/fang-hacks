@@ -25,6 +25,10 @@ start()
     echo "No IP yet, waiting..."
     sleep 3
   done
+  ntpd -q -n $NTPD_OPTS
+  sleep 2
+  hwclock -t
+  sleep 2
   ntpd $NTPD_OPTS
 }
 
