@@ -2,7 +2,12 @@
 
 ## General guide
 
-1. dd the latest image onto the SD card
+1. dd the latest image onto the (unmounted) SD card (ex: `/dev/sdi`)
+
+> **Warning: This will ERASE all data on SDCARD!**
+
+	$ sudo umount /dev/sdi1
+	$ sudo dd if=./fanghacks_v0.2.0.img of=/dev/sdi bs=1M status=progress
 
 1. Copy updated files to the bootstrap partition.  Depending on your OS and
    name of the parition, the path `/Volumes/Untitled` may need to be changed.
@@ -16,6 +21,13 @@
        cp .private/.wifi* /Volumes/Untitled/
        cp .private/wpa_supplicant.conf /Volumes/Untitled/bootstrap/
 
+If you need to change SSID/psk on `.wifi*` files:
+
+	$ echo -n 'my-ssid-wifi' > .wifissid
+	$ echo -n 'my-psk-wifi' > .wifipasswd
+
+> Warning: these files requires one line w/o line ends (editors will fail), use `echo -n` as above.
+
 1. Turn on the camera and wait a while til the light blinks blue, indicating
    the camera is on.
 
@@ -25,7 +37,7 @@
 1. Get access as root to the camera either via SSH or via telnet. The
    username is `root` and the default password is `ismart12`.
 
-1. Change the root password to something else via `passwd`.
+1. Change the root password to something else via `passwd`. Password is limited to 8 chars (believe it).
 
 1. SSH into the camera and enable SSH key login (the `/root` home directory
    isn't writable so we have to move it):
@@ -55,10 +67,18 @@
   the `updates/` folder (and uses these as part of the `01-network` script
   copied in these steps).
 
+Setup static DHCP lease to fix your cam IP on your router.
+Open fanghack setup at `http://YOUR-CAM-IP/cgi-bin/status`
+
+* Set the TZ to `GMT+3:00` (wrong, but it works on Brazil) and hostname to `xicamX`
 * Expand the SD card (requires reboot and fiddling)
-* Set the TZ to `EST-10` and hostname to `XiaoFang-Cam-X`
-* Disable Cloud Applications once boot has been assured several times
-  (including after hard power down)
+* If needed, disable Cloud Applications once boot has been assured several times
+  - At least after one clean reboot/poweroff, to linux safely unmout `mmcblk0p2`
+
+After fanghack are applied, you do not need more the `.wifi*` files at sdcard:
+
+	# rm .wifipasswd .wifissid
+
 
 ## Restoring a copy of an SD card on Mac
 
