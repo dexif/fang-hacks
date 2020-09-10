@@ -1,6 +1,13 @@
 #!/bin/sh
 PIDFILE="/var/run/rtsp-server.pid"
 
+# Parameters for snx_rtsp_server
+#SNX_PARAMS="-W 1920 -H 1080 -b 3072 -F 25 -i 25 -a" # original, -a enables audio
+#SNX_PARAMS="-W 1920 -H 1080 -b 5120 -F 8 -i 8 -g 8 -Q 8 -a" # 1080p with quality, low fps
+#SNX_PARAMS="-W 1920 -H 720  -b 4096 -F 8 -i 8 -g 8 -Q 8 -a" # 720p utrawide (cropped)
+#SNX_PARAMS="-W 1280 -H 720  -b 1024 -F 8 -i 8 -g 8 -Q 8 -a" # 720p normal
+SNX_PARAMS="-W 1920 -H 1080 -b 1024 -F 8 -i 8 -g 8 -Q 8 -a" # 1080p low bandwidth
+
 status()
 {
   pid="$(cat "$PIDFILE" 2>/dev/null)"
@@ -16,10 +23,10 @@ start()
   auth=$(cat /etc/config/.rtsp_auth)
   if [ "$auth" ]; then
       LD_LIBRARY_PATH=/media/mmcblk0p2/updates/rtsp_server/lib \
-          /media/mmcblk0p2/updates/rtsp_server/usr/bin/snx_rtsp_server -A "$auth" -W 1920 -H 1080 -b 3072 -F 25 -i 25 -a >$LOG 2>&1 &
+          /media/mmcblk0p2/updates/rtsp_server/usr/bin/snx_rtsp_server -A $auth $SNX_PARAMS >$LOG 2>&1 &
   else
       LD_LIBRARY_PATH=/media/mmcblk0p2/updates/rtsp_server/lib \
-          /media/mmcblk0p2/updates/rtsp_server/usr/bin/snx_rtsp_server -W 1920 -H 1080 -b 3072 -F 25 -i 25 -a >$LOG 2>&1 &
+          /media/mmcblk0p2/updates/rtsp_server/usr/bin/snx_rtsp_server $SNX_PARAMS >$LOG 2>&1 &
   fi
   echo "$!" > "$PIDFILE"
 }
