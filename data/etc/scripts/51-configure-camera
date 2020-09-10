@@ -4,8 +4,14 @@ start()
 {
   echo "Configuring camera image settings"
   snx_isp_ctl \
-      --sensorset-mir 1 \
-      --sensorset-flip 1
+      --sensorset-mir 0 \
+      --sensorset-flip 0
+  echo 0x40 > /proc/isp/filter/brightness
+  echo 0x20 > /proc/isp/filter/contrast
+  echo 0x75 > /proc/isp/filter/gamma
+  echo 0x0 > /proc/isp/filter/hue
+  echo 0x40 > /proc/isp/filter/saturation
+  echo 0x3 > /proc/isp/filter/sharpness
 }
 
 stop()
@@ -15,8 +21,12 @@ stop()
   snx_isp_ctl \
       --sensorset-mir 0 \
       --sensorset-flip 0
-
-  #rm -f "$STATUSFILE"
+  echo 0x40 > /proc/isp/filter/brightness
+  echo 0x20 > /proc/isp/filter/contrast
+  echo 0x64 > /proc/isp/filter/gamma
+  echo 0x0 > /proc/isp/filter/hue
+  echo 0x40 > /proc/isp/filter/saturation
+  echo 0x3 > /proc/isp/filter/sharpness
 }
 
 if [ $# -eq 0 ]; then
