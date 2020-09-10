@@ -1,4 +1,0 @@
-[submodule "bootstrap"]
-	path = bootstrap
-	url = git@github.com:davidjb/fang-hacks.git
-	branch = bootstrap
