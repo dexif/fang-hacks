@@ -1,5 +1,8 @@
 #!/bin/sh
 
+OSD_LINE1=`hostname`
+#OSD_LINE1="mycam"
+
 start()
 {
   echo "Setting OSD details"
@@ -7,10 +10,18 @@ start()
   snx_isp_ctl -c 0 \
       --osdset-en 1 \
       --osdset-ts 1 \
-      --osdset-datastr "`hostname`" \
-      --osdset-template "0123456789./-:`hostname`" \
+      --osdset-gain 2 \
+      --osdset-datastr "$OSD_LINE1" \
+      --osdset-template "0123456789./-:$OSD_LINE1" \
       --osdset-txtcolor 0xFFFFFF \
-      --osdset-position 40,20
+      --osdset-bgcolor 0x000000 \
+      --osdset-bgtransp 0x1 \
+     --osdset-position 0,1020
+
+# osd position for big txt (gain 2)
+#   original top: 40,20
+#   1080p bottom: 0,1020
+#   720p  bottom: 0,660
 }
 
 stop()
@@ -20,6 +31,7 @@ stop()
   snx_isp_ctl -c 0 \
       --osdset-en 0 \
       --osdset-ts 0 \
+      --osdset-gain 1 \
       --osdset-datastr "" \
       --osdset-template "" \
       --osdset-position 0,0
