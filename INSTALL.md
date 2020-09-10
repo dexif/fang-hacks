@@ -2,12 +2,11 @@
 
 ## General guide
 
-1. dd the latest image onto the (unmounted) SD card (ex: `/dev/sdi`)
+1. `dd` the latest image onto the (unmounted) SD card (ex: `/dev/sdi`).
+**Warning:** This will ERASE all data on SDCARD!
 
-> **Warning: This will ERASE all data on SDCARD!**
-
-	$ sudo umount /dev/sdi1
-	$ sudo dd if=./fanghacks_v0.2.0.img of=/dev/sdi bs=1M status=progress
+       $ sudo umount /dev/sdi1
+       $ sudo dd if=./fanghacks_v0.2.0.img of=/dev/sdi bs=1M status=progress
 
 1. Copy updated files to the bootstrap partition.  Depending on your OS and
    name of the parition, the path `/Volumes/Untitled` may need to be changed.
@@ -21,12 +20,10 @@
        cp .private/.wifi* /Volumes/Untitled/
        cp .private/wpa_supplicant.conf /Volumes/Untitled/bootstrap/
 
-If you need to change SSID/psk on `.wifi*` files:
+	- If you need to change SSID/psk on `.wifi*` files (Warning: these files requires one line w/o line ends, editors will fail)
 
-	$ echo -n 'my-ssid-wifi' > .wifissid
-	$ echo -n 'my-psk-wifi' > .wifipasswd
-
-> Warning: these files requires one line w/o line ends (editors will fail), use `echo -n` as above.
+              $ echo -n 'my-ssid-wifi' > .wifissid
+              $ echo -n 'my-psk-wifi' > .wifipasswd
 
 1. Turn on the camera and wait a while til the light blinks blue, indicating
    the camera is on.
@@ -77,7 +74,7 @@ Open fanghack setup at `http://YOUR-CAM-IP/cgi-bin/status`
 
 After fanghack are applied, you do not need more the `.wifi*` files at sdcard:
 
-	# rm .wifipasswd .wifissid
+       $ rm .wifipasswd .wifissid
 
 
 ## Restoring a copy of an SD card on Mac
