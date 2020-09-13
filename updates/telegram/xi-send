@@ -1,0 +1,39 @@
+#!/bin/sh
+# send msgs using github.com/lulis/telegram.sh            
+
+usage() {
+  echo "Usage:" 
+  echo "  $(basename $0) message"
+  echo "  $(basename $0) somefile message"
+  exit 1
+}
+
+# CONFIGS #
+# base folders / files / binaries
+TELEGRAM_DIR="/media/mmcblk0p2/updates/telegram"
+TELEGRAM_BIN="$TELEGRAM_DIR/telegram.sh/telegram"
+CURL_CA_BUNDLE="$TELEGRAM_DIR/api-telegram.pem"
+PRIV_CONFS="$TELEGRAM_DIR/.telegram.sh"
+# parameters
+PARAMS="-M -T $(hostname)"
+MSG="$*"
+
+if [ -z "$1" ]; then usage ; fi
+
+if [ -r "$PRIV_CONFS" ] && . "$PRIV_CONFS" ; then
+	export TELEGRAM_TOKEN
+	export TELEGRAM_CHAT
+fi
+export CURL_CA_BUNDLE
+
+
+# if first param is not a file, send as text!
+if [ ! -f "$1" ]; then
+        $TELEGRAM_BIN $PARAMS -m "$MSG"
+else
+        # otherwise, try send as image
+        if ! $TELEGRAM_BIN $PARAMS -i "$1" -m "$MSG" ; then
+                # if it fails, send as archive
+                $TELEGRAM_BIN $PARAMS -f "$1" -m "$MSG"
+        fi
+fi

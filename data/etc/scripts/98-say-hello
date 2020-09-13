@@ -1,0 +1,33 @@
+#!/bin/sh
+
+has_ip()
+{
+  ifconfig wlan0 | grep -c inet
+}
+
+start()
+{
+  echo "Wait for ip..."
+  while [ $(has_ip) -eq 0 ]; do
+    echo "No IP yet, waiting..."
+    sleep 10 
+  done
+
+  echo "Sending message"
+  ANIP=$(ifconfig wlan0 | awk '/inet /{print $2}')
+  xi-send "I'm ready! $ANIP" 
+} 
+
+stop()
+{ 
+  echo "Nothing to see here"
+} 
+ 
+if [ $# -eq 0 ]; then
+  start
+else
+  case $1 in start|stop)
+    $1
+    ;;
+  esac 
+fi 

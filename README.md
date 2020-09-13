@@ -2,6 +2,12 @@
 
 Collection of modifications for the XiaoFang WiFi Camera
 
+## Notes
+
+This fanghacks fork adds:
+- [curl binaries](https://github.com/samtap/fang-hacks/commit/0334bb8b6442f534c966d029f215e7ea9931bd07)
+- [telegram.sh fork](https://github.com/lulis/telegram.sh)
+
 ## General usage
 
 Download an sd-card image from the [releases](https://github.com/samtap/fang-hacks/releases) page or follow the manual steps below.
