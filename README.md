@@ -5,8 +5,9 @@ Collection of modifications for the XiaoFang WiFi Camera
 ## Notes
 
 This fanghacks fork adds:
-- [curl binaries](https://github.com/samtap/fang-hacks/commit/0334bb8b6442f534c966d029f215e7ea9931bd07)
-- [telegram.sh fork](https://github.com/lulis/telegram.sh)
+- Some `curl` binaries [from `x-data` branch](https://github.com/samtap/fang-hacks/commit/0334bb8b6442f534c966d029f215e7ea9931bd07)
+- A [telegram.sh fork](https://github.com/lulis/telegram.sh) for usage on `sh`
+  - Config your tokens at `updates/telegram/.telegram.sh`, send using a easy `xi-send` script.
 
 ## General usage
 
