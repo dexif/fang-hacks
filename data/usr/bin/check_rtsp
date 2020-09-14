@@ -8,6 +8,7 @@ RTSP_SCRIPT="/media/mmcblk0p2/data/etc/scripts/20-rtsp-server"
 restart_rtsp()
 {
     $RTSP_SCRIPT stop && $RTSP_SCRIPT start
+    xi-send "My rtsp server seems hung, I've restarted it."
 }
 
 check_pid()
