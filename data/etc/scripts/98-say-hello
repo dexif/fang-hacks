@@ -15,7 +15,9 @@ start()
 
   echo "Sending message"
   ANIP=$(ifconfig wlan0 | awk '/inet /{print $2}')
-  xi-send "I'm ready! $ANIP" 
+  xi-send "I'm ready! $ANIP "$'\xE2\x84\xB9'
+    # emojii :information: in utf-8 bytes: \xE2\x84\xB9
+    # https://apps.timwhitlock.info/emoji/tables/unicode
 } 
 
 stop()
