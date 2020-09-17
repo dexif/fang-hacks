@@ -62,7 +62,7 @@ Only shell `sh` and `curl`.
   * Use the `/newbot` command to create a new bot. Keep the given token.
 * Use your telegram client to send any message to your new bot. 
 * Find your chat id runnung telegram.sh with `-l`: `telegram -t <TOKEN> -l`.
-* You now have your token and your chat id. Send yourself a first message:
+* You now have your token and your chat id. Send yourself a first message:  
     `telegram -t <TOKEN> -c <CHAT ID> -m "Hello there."`
 
 Carrying the token and the chat id around can be quite cumbersome. You can
