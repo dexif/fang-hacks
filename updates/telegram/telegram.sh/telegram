@@ -64,7 +64,7 @@ help() {
 	echo "    Later methods overwrite earlier settings, so you can easily override global settings."
 	echo "    Please be aware that you shuld keep your telegram token secret!"
 	echo
-	exit
+	exit $1
 }
 
 version() {
@@ -162,7 +162,7 @@ check_file() {
 		exit 1
 	fi
 
-	size=$(stat -c%s "$1")
+	size=$(wc -c < "$1")
 	if [ "$size" -gt 52428800 ]; then
 		echo "File $1 is breaking the file size limit imposed on Telegram bots (currently 50MB)."
 		exit 1
@@ -179,76 +179,27 @@ escapeMarkdown() {
 
 ARGNUM="$#"
 while [ "$#" -gt 0 ]; do
-# "t:c:i:f:MHCrhlvjnRDNT:"
 	case $1 in
-		-t)
-			TOKEN="$2"
-			;;
-		-c)
-			ACHAT="$2"
-			;;
-		-m)
-			TEXT="$2"
-			#if [ "$TEXT" = "-" ]; then shift ; fi
-			;;
-		-i)
-			IMAGE_FILE="$2"
-			;;
-		-f)
-			DOCUMENT_FILE="$2"
-			;;
-		-M)
-			PARSE_MODE="Markdown"
-			;;
-		-H)
-			PARSE_MODE="HTML"
-			;;
-		-C)
-			PARSE_MODE="Markdown"
-			CODE_MODE=1
-			;;
-		-r)
-			PARSE_MODE="Markdown"
-			CRON_MODE=1
-			;;
-		-l)
-			ACTION="list_chats"
-			;;
-		-v)
-			DEBUG=true
-			;;
-		-j)
-			HAS_JQ=false
-			;;
-		-n)
-			DRY_RUN=true
-			;;
-		-R)
-			ACTION="receive_file"
-			;;
-		-D)
-			DISABLE_WEB_PAGE_PREVIEW=true
-			;;
-		-N)
-			DISABLE_NOTIFICATION=true
-			;;
-		-T)
-			TITLE="$2"
-			;;
-		-?|-h)
-			help
-			;;
-		--)
-			break
-			;;
-		-*)
-			echo "Invalid option '$1', use '-h' to help" >&2
-			exit 1
-			;;
-		# an option argument, continue
-		*)	;;
+		-t) TOKEN="$2"; shift 2 ;;
+		-c) ACHAT="$2"; shift 2 ;;
+		-m) TEXT="$2"; shift 2 ;;
+		-i) IMAGE_FILE="$2"; shift 2 ;;
+		-f) DOCUMENT_FILE="$2"; shift 2 ;;
+		-T) TITLE="$2"; shift 2 ;;
+		-M) PARSE_MODE="Markdown"; shift ;;
+		-H) PARSE_MODE="HTML"; shift ;;
+		-C) PARSE_MODE="Markdown"; CODE_MODE=1; shift ;;
+		-r) PARSE_MODE="Markdown"; CRON_MODE=1; shift ;;
+		-l) ACTION="list_chats"; shift ;;
+		-v) DEBUG=true; shift ;;
+		-j) HAS_JQ=false; shift ;;
+		-n) DRY_RUN=true; shift ;;
+		-R) ACTION="receive_file"; shift ;;
+		-D) DISABLE_WEB_PAGE_PREVIEW=true; shift ;;
+		-N) DISABLE_NOTIFICATION=true; shift ;;
+		-?|-h) help 0 ;;
+		*) echo "Invalid option: '$1'\n" ; help 1 ;;
 		esac
-		shift
 done
 
 if [ "$CRON_MODE" -eq 1 ] && [ "$CODE_MODE" -eq 1 ]; then
