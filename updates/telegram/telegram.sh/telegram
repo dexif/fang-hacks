@@ -2,6 +2,7 @@
 # https://github.com/fabianonline/telegram.sh
 # adapted to work on simple shell sh
 
+SCRIPTNAME="$(basename $0)"
 VERSION="0.3.1"
 TOKEN=""
 ACHAT=""
@@ -12,7 +13,6 @@ IMAGE_FILE=""
 DOCUMENT_FILE=""
 PARSE_MODE=""
 CODE_MODE=0
-CRON_MODE=0
 ACTION=""
 TITLE=""
 DISABLE_WEB_PAGE_PREVIEW=false
@@ -28,20 +28,19 @@ hash jq >/dev/null 2>&1 && HAS_JQ=true
 
 help() {
 	version
-	echo "Usage: $0 [options]"
+	echo "Usage: $SCRIPTNAME [options]"
 	echo
 	echo "OPTIONS are:"
 	echo "    -m <MESSAGE>     Message text to send."
-#FIXME	echo "                     Message can be '-', in that case STDIN will be used."
+	echo "    -                Message from STDIN (piped) will be used."
 	echo "    -t <TOKEN>       Telegram bot token to use. See ENVIRONMENT for more information."
-	echo "    -c <CHAT_ID>     Chat to use as recipient. Can be given more than once. See ENVIRONMENT for more information."
+	echo "    -c <CHAT_ID>     Chat to use as recipient. See ENVIRONMENT for more information."
 	echo "    -f <FILE>        Sends file."
 	echo "    -i <FILE>        Sends file as image. This will fail if the file isn't an actual image file."
+	echo "    -T <TITLE>       Sets a title for the message. Printed in bold text if -M or -H is used."
 	echo "    -M               Enables Markdown processing at telegram."
 	echo "    -H               Enables HTML processing at telegram."
 	echo "    -C               Sends text as monospace code. Useful when piping command outputs into this tool."
-	echo "    -r               Like -C, but if the first line starts with '+ ', it is specially formatted."
-	echo "    -T <TITLE>       Sets a title for the message. Printed in bold text if -M or -H is used."
 	echo "    -l               Fetch known chat_ids."
 	echo "    -R               Receive a file sent via telegram."
 	echo "    -D               Sets disable_web_page_preview parameter to, well, disable the preview for links to webpages."
@@ -72,11 +71,17 @@ version() {
 	echo "by Fabian Schlenz"
 }
 
+# based on https://stackoverflow.com/a/38607019
 json_console() {
-	# based on https://stackoverflow.com/a/38607019
 	#echo -n "$1" | grep -Eo '"[^"]*" *(: *([0-9]*|"[^"]*")[^{}\["]*|,)?|[^"\]\[\}\{]*|\{|\},?|\[|\],?|[0-9 ]*,?' | awk '{if ($0 ~ /^[}\]]/ ) offset-=1; printf "%*c%s\n", offset, " ", $0; if ($0 ~ /^[{\[]/) offset+=1}'
 	echo -n "$1" | grep -Eo '"[^"]*" *(: *([0-9]*|"[^"]*")[^{}\["]*|,)?|[^"\]\[\}\{]*|\{|\},?|\[|\],?|[0-9 ]*,?' | awk '{printf "  %s\n", $0}'
 }
+
+# based on http://www.etalabs.net/sh_tricks.html
+fnmatch() {
+	case "$2" in $1) return 0 ;; *) return 1 ;; esac ;
+}
+
 
 list_chats() {
 	log "$URL$TOKEN"
@@ -183,13 +188,13 @@ while [ "$#" -gt 0 ]; do
 		-t) TOKEN="$2"; shift 2 ;;
 		-c) ACHAT="$2"; shift 2 ;;
 		-m) TEXT="$2"; shift 2 ;;
+		-) TEXT="-"; shift ;;
 		-i) IMAGE_FILE="$2"; shift 2 ;;
 		-f) DOCUMENT_FILE="$2"; shift 2 ;;
 		-T) TITLE="$2"; shift 2 ;;
 		-M) PARSE_MODE="Markdown"; shift ;;
 		-H) PARSE_MODE="HTML"; shift ;;
 		-C) PARSE_MODE="Markdown"; CODE_MODE=1; shift ;;
-		-r) PARSE_MODE="Markdown"; CRON_MODE=1; shift ;;
 		-l) ACTION="list_chats"; shift ;;
 		-v) DEBUG=true; shift ;;
 		-j) HAS_JQ=false; shift ;;
@@ -197,15 +202,10 @@ while [ "$#" -gt 0 ]; do
 		-R) ACTION="receive_file"; shift ;;
 		-D) DISABLE_WEB_PAGE_PREVIEW=true; shift ;;
 		-N) DISABLE_NOTIFICATION=true; shift ;;
-		-?|-h) help 0 ;;
-		*) echo "Invalid option: '$1'\n" ; help 1 ;;
+		-h) help 0 ;;
+		-?|*) echo "Invalid option: '$1' \nUse $SCRIPTNAME -h for help." ; exit 1 ;;
 		esac
 done
-
-if [ "$CRON_MODE" -eq 1 ] && [ "$CODE_MODE" -eq 1 ]; then
-	echo "You can either use -C or -r, but not both."
-	exit 1
-fi
 
 log "TOKEN is now '$TOKEN'"
 log "ACHAT is now '$ACHAT'"
@@ -222,7 +222,6 @@ log "Importing config file(s)..."
 
 [ -r /etc/telegram.sh.conf ] && . /etc/telegram.sh.conf
 [ -r ~/.telegram.sh ] && . ~/.telegram.sh
-#[ -r ./.telegram.sh ] && . ./.telegram.sh
 
 [ -z "$TOKEN" ] && TOKEN=$TELEGRAM_TOKEN
 [ -z "$ACHAT" ] && ACHAT=$TELEGRAM_CHAT
@@ -256,48 +255,14 @@ fi
 
 log "Text: $TEXT"
 
-#[ "$TEXT" = "-" ] && TEXT=$(</dev/stdin)
+if [ "$TEXT" = "-" ] ; then
+	TEXT=$(cat -)
+fi
 
 log "Text: $TEXT"
 
 if [ $CODE_MODE -eq 1 ]; then
 	TEXT='```'$'\n'$TEXT$'\n''```'
-fi
-
-if [ $CRON_MODE -eq 1 ]; then
-	ONLY_COMMANDS=1
-	echo "$TEXT" | while read line; do
-		if [ "${line:0:2}" = "+ " ]; then
-			ONLY_COMMANDS=0
-		fi
-	done
-
-	if [ "$ONLY_COMMANDS" -eq 1 ]; then
-		exit 0
-	fi
-
-	TEXT='```'$'\n'$TEXT$'\n''```'
-
-	#FIRST_LINE=1
-	#BLOCK_OPEN=0
-	#NEW_TEXT=""
-	#while read line; do
-	#	if [ "${line:0:2}" = "+ " ]; then
-	#		if [ "$BLOCK_OPEN" -eq 1 ]; then
-	#			NEW_TEXT="$NEW_TEXT"'```'$'\n'
-	#			BLOCK_OPEN=0
-	#		fi
-	#		NEW_TEXT="$NEW_TEXT*`escapeMarkdown "${line:2}"`*"$'\n'
-	#	else
-	#		if [ "$BLOCK_OPEN" -eq 0 ]; then
-	#			NEW_TEXT="$NEW_TEXT"'```'$'\n'
-	#			BLOCK_OPEN=1
-	#		fi
-	#		NEW_TEXT="$NEW_TEXT$line"$'\n'
-	#	fi
-	#done <<< "$TEXT"
-	#[ "$BLOCK_OPEN" -eq 1 ] && NEW_TEXT="$NEW_TEXT"'```'
-	#TEXT="$NEW_TEXT"
 fi
 
 log "Text: $TEXT"
@@ -362,22 +327,10 @@ for id in "$ACHAT"; do
 		exit $status
 	fi
 
-	#if [ "$HAS_JQ" = true ]; then
-		##if [ "`jq -r '.ok' <<< "$response"`" != "true" ]; then
-			#echo "Telegram reported following error:"
-			##jq -r '"\(.error_code): \(.description)"' <<< "$response"
-			#echo "Quitting."
-			#exit 1
-		##fi
-	#else
-		case "$response" in
-			'{"ok":true'*)
-				;;
-			*)
-				echo "Telegram reported an error:"
-				json_console "$response"
-				echo "Quitting."
-				exit 1
-		esac
-	#fi
+	if ! fnmatch '{"ok":true*' "$response" ; then
+		echo "Telegram reported an error:"
+		json_console "$response"
+		echo "Quitting."
+		exit 1
+	fi
 done

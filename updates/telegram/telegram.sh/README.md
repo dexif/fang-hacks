@@ -29,8 +29,7 @@ telegram -m "Hello, World."
 
 # Split them into multiple lines
 telegram -m "Hello,"$'\n'"World."
-# or #FIXME
-# echo -e "Hello\nWorld." | telegram -
+echo -e "Hello\nWorld." | telegram -
 
 # Or you send this one message to another chat:
 telegram -c 6789 -m "Hello, Mars."
@@ -38,8 +37,8 @@ telegram -c 6789 -m "Hello, Mars."
 # You can also send messages to multiple chats:
 telegram -c 1234 -c 6789 -m "Hello, Planets."
 
-# Send stuff via stdin. It will automatically be sent as monospace code: #FIXME
-#ls -l | telegram -
+# Send stuff via stdin as monospace code:
+ls -l | telegram -C -
 
 # Use markdown in your message (HTML is available as well):
 telegram -M -m "To *boldly* go, where _no man_ has gone before."
