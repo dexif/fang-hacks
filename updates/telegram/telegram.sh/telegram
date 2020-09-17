@@ -1,7 +1,4 @@
 #!/bin/sh
-# telegram.sh adapted to work on simple shell sh
-# original: https://github.com/fabianonline/telegram.sh
-# this fork: https://github.com/lulis/telegram.sh
 
 SCRIPTNAME="$(basename $0)"
 VERSION="0.3.2-sh"
@@ -44,8 +41,10 @@ help() {
 	echo "    -N               Send message without notification sound"
 	echo "    -v               Verbose mode"
 	echo "    -n               Dry-run: don't send, only print"
+	echo "    -h               This help"
+	echo "    --version        Show version info"
 	echo
-	echo "TOKEN and CHAT_ID will be searched in (later has precedence):"
+	echo "The TOKEN and CHAT_ID will be searched in (latest has precedence):"
 	echo "  1) globally in /etc/telegram.sh.conf"
 	echo "  2) user-local in ~/.telegram.sh"
 	echo "  3) environment variables TELEGRAM_TOKEN and TELEGRAM_CHAT"
@@ -55,7 +54,16 @@ help() {
 }
 
 version() {
-	echo "telegram.sh $VERSION (original by Fabian Schlenz)"
+	echo "telegram.sh $VERSION"
+	if [ "$1" = "full" ]; then
+		echo 
+		echo "A telegram client to work on simple shell sh."
+		echo "    https://github.com/lulis/telegram.sh"
+		echo 
+		echo "Based on original telegram.sh by Fabian Schlenz:"
+		echo "    https://github.com/fabianonline/telegram.sh"
+		echo 
+	fi
 }
 
 # based on https://stackoverflow.com/a/38607019
@@ -116,7 +124,8 @@ while [ "$#" -gt 0 ]; do
 		-n) DRY_RUN=true; shift ;;
 		-D) DISABLE_WEB_PAGE_PREVIEW=true; shift ;;
 		-N) DISABLE_NOTIFICATION=true; shift ;;
-		-h) help 0 ;;
+		-h) help 0 ; exit ;;
+		--version) version full ; exit ;;
 		-?|*) echo "Invalid option: '$1' \nUse $SCRIPTNAME -h for help." ; exit 1 ;;
 		esac
 done
