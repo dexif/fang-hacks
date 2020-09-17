@@ -34,9 +34,6 @@ echo -e "Hello\nWorld." | telegram -
 # Or you send this one message to another chat:
 telegram -c 6789 -m "Hello, Mars."
 
-# You can also send messages to multiple chats:
-telegram -c 1234 -c 6789 -m "Hello, Planets."
-
 # Send stuff via stdin as monospace code:
 ls -l | telegram -C -
 
@@ -47,33 +44,24 @@ telegram -M -m "To *boldly* go, where _no man_ has gone before."
 telegram -f results.txt -m "Here are the results."
 
 # Or an image, giving you a preview and stuff.
-telegram -i solar_system.png # We don't need to send a message if we're
-# sending a file.
+telegram -i solar_system.png
 
 # Use environment variables to tell curl to use a proxy server:
 HTTPS_PROXY="socks5://127.0.0.1:1234" telegram -m "Hello, World."
-# Check the curl documentation for more info about supported proxy
-# protocols.
 ```
 
 ## Requirements
 
-Only `bash` and `curl`. Listing known chats with `-l` requires `jq`, but you can
-easily use this tool without this.
+Only shell `sh` and `curl`.
 
 ## Installation / configuration
 
 * Grab the latest `telegram` file from this repository and put it somewhere.
 * Create a bot at telegram:
   * Search for the user `@botfather` at telegram and start a chat with him.
-  * Use the `/newbot` command to create a new bot. BotFather will give you a
-    token. Keep this.
-* Use your telegram client to send a message to your new bot. Any message
-    will do.
-* Find your chat id. Run telegram.sh with `-l`: `telegram -t
-    <TOKEN> -l`. If you have `jq` installed, it will nicely list its known chats. The number at the front is
-    your chat id. If you don't have `jq` installed, it will print a bit of
-    JSON data and tell you what to look for.
+  * Use the `/newbot` command to create a new bot. Keep the given token.
+* Use your telegram client to send any message to your new bot. 
+* Find your chat id runnung telegram.sh with `-l`: `telegram -t <TOKEN> -l`.
 * You now have your token and your chat id. Send yourself a first message:
     `telegram -t <TOKEN> -c <CHAT ID> -m "Hello there."`
 
@@ -98,11 +86,18 @@ TELEGRAM_CHAT="12345678"
 
 Please be aware that you should keep your token a secret.
 
-You can also add permanent proxy settings in there by adding:
+You can add other options here, like:
+
+```bash
+TELEGRAM_DISABLE_WEB_PAGE_PREVIEW=true  # will behave like  -D option"
+TELEGRAM_DISABLE_NOTIFICATION=true      # will behave like  -N option"
+```
+
+### Proxy Settings
+
+You can also add permanent proxy settings to config files by adding:
 
 ```bash
 export HTTPS_PROXY="socks5://127.0.0.1:1234"
 ```
-
-See the curl documentation for more information about which proxy protocols
-are supported.
+See the curl documentation for more information about which proxy protocols are supported.

@@ -1,9 +1,10 @@
 #!/bin/sh
-# https://github.com/fabianonline/telegram.sh
-# adapted to work on simple shell sh
+# telegram.sh adapted to work on simple shell sh
+# original: https://github.com/fabianonline/telegram.sh
+# this fork: https://github.com/lulis/telegram.sh
 
 SCRIPTNAME="$(basename $0)"
-VERSION="0.3.1"
+VERSION="0.3.2-sh"
 TOKEN=""
 ACHAT=""
 DEBUG=false
@@ -22,53 +23,39 @@ URL="https://api.telegram.org/bot"
 FILE_URL="https://api.telegram.org/file/bot"
 CURL_OPTIONS="-s"
 
-HAS_JQ=false
-hash jq >/dev/null 2>&1 && HAS_JQ=true
-
 
 help() {
 	version
 	echo "Usage: $SCRIPTNAME [options]"
 	echo
-	echo "OPTIONS are:"
-	echo "    -m <MESSAGE>     Message text to send."
-	echo "    -                Message from STDIN (piped) will be used."
-	echo "    -t <TOKEN>       Telegram bot token to use. See ENVIRONMENT for more information."
-	echo "    -c <CHAT_ID>     Chat to use as recipient. See ENVIRONMENT for more information."
-	echo "    -f <FILE>        Sends file."
-	echo "    -i <FILE>        Sends file as image. This will fail if the file isn't an actual image file."
-	echo "    -T <TITLE>       Sets a title for the message. Printed in bold text if -M or -H is used."
-	echo "    -M               Enables Markdown processing at telegram."
-	echo "    -H               Enables HTML processing at telegram."
-	echo "    -C               Sends text as monospace code. Useful when piping command outputs into this tool."
-	echo "    -l               Fetch known chat_ids."
-	echo "    -R               Receive a file sent via telegram."
-	echo "    -D               Sets disable_web_page_preview parameter to, well, disable the preview for links to webpages."
-	echo "                     Can also be set in config as TELEGRAM_DISABLE_WEB_PAGE_PREVIEW=true (see ENVIRONMENT)"
-	echo "                     This feature is only supported for text messages, not when sending files or images (-f, -i)."
-	echo "    -N               Diables notifications on clients. Users will receive a notification with no sound."
-	echo "                     Can also be set in config as TELEGRAM_DISABLE_NOTIFICATION=true (see ENVIRONMENT)"
+	echo "OPTIONS"
+	echo "    -m <MESSAGE>     Message text to send"
+	echo "    -                Message from STDIN (piped) will be used"
+	echo "    -t <TOKEN>       Telegram bot token to use"
+	echo "    -c <CHAT_ID>     Chat to use as recipient"
+	echo "    -f <FILE>        Sends file"
+	echo "    -i <FILE>        Sends file as image (fail if is not a image)"
+	echo "    -T <TITLE>       Sets a title for the message"
+	echo "    -M               Enables Markdown processing"
+	echo "    -H               Enables HTML processing"
+	echo "    -C               Sends text as monospace code"
+	echo "    -l               Fetch known chat_ids"
+	echo "    -D               Disable link preview on text messages"
+	echo "    -N               Send message without notification sound"
+	echo "    -v               Verbose mode"
+	echo "    -n               Dry-run: don't send, only print"
 	echo
-	echo "DEBUGGING OPTIONS are:"
-	echo "    -v               Display lots of more or less useful information."
-	echo "    -j               Pretend you don't have JQ installed."
-	echo "    -n               Dry-run - don't send messages, only print them on screen."
-	echo
-	echo "ENVIRONMENT"
-	echo "    TOKEN and CHAT_ID are required. You can set them in four different ways:"
-	echo "      1) globally in /etc/telegram.sh.conf"
-	echo "      2) user-local in ~/.telegram.sh"
-	echo "      3) via environment variables TELEGRAM_TOKEN and TELEGRAM_CHAT"
-	echo "      4) via options -t and -c"
-	echo "    Later methods overwrite earlier settings, so you can easily override global settings."
-	echo "    Please be aware that you shuld keep your telegram token secret!"
+	echo "TOKEN and CHAT_ID will be searched in (later has precedence):"
+	echo "  1) globally in /etc/telegram.sh.conf"
+	echo "  2) user-local in ~/.telegram.sh"
+	echo "  3) environment variables TELEGRAM_TOKEN and TELEGRAM_CHAT"
+	echo "  4) options -t and -c"
 	echo
 	exit $1
 }
 
 version() {
-	echo "telegram.sh version $VERSION"
-	echo "by Fabian Schlenz"
+	echo "telegram.sh $VERSION (original by Fabian Schlenz)"
 }
 
 # based on https://stackoverflow.com/a/38607019
@@ -88,73 +75,10 @@ list_chats() {
 	response=`curl $CURL_OPTIONS $URL$TOKEN/getUpdates`
 	log "$response"
 
-	if [ "$HAS_JQ" = true ]; then
-		echo "These are the available chats that I can find right now. The ID is the number at the front."
-		echo "If there are no chats or the chat you are looking for isn't there, run this command again"
-		echo "after sending a message to your bot via telegram."
-		echo
-		#jq -r '.result | .[].message.chat | "\(.id|tostring) - \(.first_name) \(.last_name) (@\(.username))"' 2>/dev/null <<< "$response" || {
-			#echo "Could not parse reponse from Telegram."
-			#echo "Response was: $response"
-			#exit 1
-		#}
-	else
-		echo "You don't have jq installed. I'm afraid I can't parse the JSON from telegram without it."
-		echo "So I'll have you do it. ;-)"
-		echo
-		echo "Please look for your chat_id in this output by yourself."
-		echo 'Look for something like "chat":{"id":<CHAT_ID> and verify that first_name, last_name and'
-		echo "username match your expected chat."
-		echo
-		echo "If there are no chats listed or the chat you are looking for isn't there, try again after"
-		echo "sending a message to your bot via telegram."
-		echo
-		json_console "$response"
-	fi
-}
-
-receive_file() {
-	if [ "$HAS_JQ" = false ]; then
-		echo "You need to have jq installed in order to be able to download files."
-		exit 1
-	fi
-
-	result=`curl $CURL_OPTIONS $URL$TOKEN/getUpdates?allowed_updates=message`
-	log "$result"
-	# {"ok":true,"result":[
-	#   {
-	#     "update_id":441727866,
-	#     "message":{
-	#       "message_id":8339,
-	#       "from":{"id":15773,"is_bot":false,"first_name":"Fabian","last_name":"Schlenz","username":"fabianonline","language_code":"de"},
-	#       "chat":{"id":15773,"first_name":"Fabian","last_name":"Schlenz","username":"fabianonline","type":"private"},
-	#       "date":1526564127,
-	#       "document":{"file_name":"desktop.ini","file_id":"BQAav-HkXugI","file_size":282}}}]}
-	#file_id=`jq -r '.result[-1].message.document.file_id' <<< "$result"`
-	log "file_id: $file_id"
-	if [ "$file_id" == "null" ]; then
-		echo "Last message received apparently didn't contain a file. Aborting."
-		exit 1
-	fi
-	#file_name=`jq -r '.result[-1].message.document.file_name' <<< "$result"`
-	log "file_name: $file_name"
-	result=`curl $CURL_OPTIONS $URL$TOKEN/getFile?file_id=$file_id`
-	log $result
-	# {"ok":true,"result":{"file_id":"BQAav-HkXugI","file_size":282,"file_path":"documents/file_271.ini"}}
-	#path=`jq -r '.result.file_path' <<< "$result"`
-	log "path: $path"
-	if [ "$path" == "null" ]; then
-		echo "Could not parse telegram's response to getFile. Aborting."
-		exit 1
-	fi
-	file_name="`date +%s`_$file_name"
-	log "file_name: $file_name"
-	if [ -e "$file_name" ]; then
-		echo "File $file_name already exists. This is unexpected, so I'm quitting now."
-		exit 1
-	fi
-	curl $FILE_URL$TOKEN/$path --output "$file_name"
-	echo "File downloaded as $file_name"
+	echo 'Look for your chat_id below, something like "chat":{"id":<CHAT_ID>.'
+	echo "Verify also first_name, last_name and username."
+	echo
+	json_console "$response"
 }
 
 log() {
@@ -169,17 +93,9 @@ check_file() {
 
 	size=$(wc -c < "$1")
 	if [ "$size" -gt 52428800 ]; then
-		echo "File $1 is breaking the file size limit imposed on Telegram bots (currently 50MB)."
+		echo "File $1 is bigger than Telegram bots limits (currently 50MB)."
 		exit 1
 	fi
-}
-
-escapeMarkdown() {
-	res="${1//\*/∗}"
-	res="${res//_/＿}"
-	res="${res//\`/‵}"
-	#res="${res//\//∕}"
-	echo "$res"
 }
 
 ARGNUM="$#"
@@ -197,9 +113,7 @@ while [ "$#" -gt 0 ]; do
 		-C) PARSE_MODE="Markdown"; CODE_MODE=1; shift ;;
 		-l) ACTION="list_chats"; shift ;;
 		-v) DEBUG=true; shift ;;
-		-j) HAS_JQ=false; shift ;;
 		-n) DRY_RUN=true; shift ;;
-		-R) ACTION="receive_file"; shift ;;
 		-D) DISABLE_WEB_PAGE_PREVIEW=true; shift ;;
 		-N) DISABLE_NOTIFICATION=true; shift ;;
 		-h) help 0 ;;
@@ -248,11 +162,6 @@ if [ "$ACTION" = "list_chats" ]; then
 	exit 0
 fi
 
-if [ "$ACTION" = "receive_file" ]; then
-	receive_file
-	exit 0
-fi
-
 log "Text: $TEXT"
 
 if [ "$TEXT" = "-" ] ; then
@@ -278,12 +187,12 @@ if [ -n "$TITLE" ]; then
 fi
 
 if [ -z "$TEXT" ] && [ -z "$DOCUMENT_FILE" ] && [ -z "$IMAGE_FILE" ]; then
-	echo "Neither text nor image or other file given."
+	echo "Message needs some text, image or file."
 	exit 1
 fi
 
 if [ -n "$DOCUMENT_FILE" ] && [ -n "$IMAGE_FILE" ]; then
-	echo "You can't send a file AND an image at the same time."
+	echo "Can't send a file AND an image at the same time."
 	exit 1
 fi
 
