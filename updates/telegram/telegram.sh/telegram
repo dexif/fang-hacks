@@ -2,24 +2,19 @@
 
 SCRIPTNAME="$(basename $0)"
 VERSION="0.3.2-sh"
-TOKEN=""
-ACHAT=""
-DEBUG=false
-DRY_RUN=false
 
-IMAGE_FILE=""
-DOCUMENT_FILE=""
-PARSE_MODE=""
-CODE_MODE=0
-ACTION=""
-TITLE=""
-DISABLE_WEB_PAGE_PREVIEW=false
-DISABLE_NOTIFICATION=false
-
-URL="https://api.telegram.org/bot"
-FILE_URL="https://api.telegram.org/file/bot"
-CURL_OPTIONS="-s"
-
+version() {
+	echo "telegram.sh $VERSION"
+	if [ "$1" = "full" ]; then
+		echo 
+		echo "A telegram client to work on simple shell sh."
+		echo "    https://github.com/lulis/telegram.sh"
+		echo 
+		echo "Based on original telegram.sh by Fabian Schlenz:"
+		echo "    https://github.com/fabianonline/telegram.sh"
+		echo 
+	fi
+}
 
 help() {
 	version
@@ -53,18 +48,24 @@ help() {
 	exit $1
 }
 
-version() {
-	echo "telegram.sh $VERSION"
-	if [ "$1" = "full" ]; then
-		echo 
-		echo "A telegram client to work on simple shell sh."
-		echo "    https://github.com/lulis/telegram.sh"
-		echo 
-		echo "Based on original telegram.sh by Fabian Schlenz:"
-		echo "    https://github.com/fabianonline/telegram.sh"
-		echo 
-	fi
-}
+
+TOKEN=""
+ACHAT=""
+DEBUG=false
+DRY_RUN=false
+IMAGE_FILE=""
+DOCUMENT_FILE=""
+PARSE_MODE=""
+CODE_MODE=0
+ACTION=""
+TITLE=""
+DISABLE_WEB_PAGE_PREVIEW=false
+DISABLE_NOTIFICATION=false
+
+URL="https://api.telegram.org/bot"
+FILE_URL="https://api.telegram.org/file/bot"
+CURL_OPTIONS="-s"
+
 
 # based on https://stackoverflow.com/a/38607019
 json_console() {

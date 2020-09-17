@@ -46,6 +46,9 @@ telegram -f results.txt -m "Here are the results."
 # Or an image, giving you a preview and stuff.
 telegram -i solar_system.png
 
+# See all options:
+telegram -h
+
 # Use environment variables to tell curl to use a proxy server:
 HTTPS_PROXY="socks5://127.0.0.1:1234" telegram -m "Hello, World."
 ```
