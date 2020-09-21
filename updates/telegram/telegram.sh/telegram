@@ -69,8 +69,8 @@ CURL_OPTIONS="-s"
 
 # based on https://stackoverflow.com/a/38607019
 json_console() {
-	#echo -n "$1" | grep -Eo '"[^"]*" *(: *([0-9]*|"[^"]*")[^{}\["]*|,)?|[^"\]\[\}\{]*|\{|\},?|\[|\],?|[0-9 ]*,?' | awk '{if ($0 ~ /^[}\]]/ ) offset-=1; printf "%*c%s\n", offset, " ", $0; if ($0 ~ /^[{\[]/) offset+=1}'
-	echo -n "$1" | grep -Eo '"[^"]*" *(: *([0-9]*|"[^"]*")[^{}\["]*|,)?|[^"\]\[\}\{]*|\{|\},?|\[|\],?|[0-9 ]*,?' | awk '{printf "  %s\n", $0}'
+	echo -n "$1" | grep -Eo '"[^"]*" *(: *([0-9]*|"[^"]*")[^{}\["]*|,)?|[^"\]\[\}\{]*|\{|\},?|\[|\],?|[0-9 ]*,?' | \
+	awk '{if ($0 ~ /^[]}]/) i--; j=0; while (j++<i) printf " "; printf "%s\n", $0; if ($0 ~ /^[[{]/) i++}'
 }
 
 # based on http://www.etalabs.net/sh_tricks.html
@@ -83,10 +83,9 @@ list_chats() {
 	log "$URL$TOKEN"
 	response=`curl $CURL_OPTIONS $URL$TOKEN/getUpdates`
 	log "$response"
-
 	echo 'Look for your chat_id below, something like "chat":{"id":<CHAT_ID>.'
 	echo "Verify also first_name, last_name and username."
-	echo
+	echo "If the chat is not listed, send a message to your bot and try again."
 	json_console "$response"
 }
 
